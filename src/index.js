@@ -1,4 +1,4 @@
-import { View, Text ,StyleSheet,TextInput,TouchableOpacity,Keyboard, SectionListComponent,Image } from 'react-native'
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native'
 import React,{useState} from 'react'
 import DropDownPicker from 'react-native-dropdown-picker'
 import axios from 'axios'
@@ -9,9 +9,9 @@ const TranslatorApp  = () => {
   const [translatedText,setTranslatedText]=useState('');
   const [fromLang,setFromLang]=useState('English');
   const [toLang,setToLang]=useState('Arabic');
-  const[openFrom,setOpenFrom]=useState('false'); //handle the vasisbilty of the langage selection dropdowns 
-  const [openTo,setOpenTo]=useState('false');
-  const API_KEY='sk-THC2EvrwURzv89MLUgHAT3Blgjsp9sg4eOv7dxylVwr68';
+  const [openFrom, setOpenFrom] = useState(false);
+  const [openTo, setOpenTo] = useState(false);
+  const API_KEY='your-api-key';
 
 
   const translateText = async () => {
@@ -19,15 +19,12 @@ const TranslatorApp  = () => {
       const response = await axios.post(
         'https://api.openai.com/v1/chat/completions',
         {
+          model: 'gpt-3.5-turbo',
           messages: [
-            {
-              role: 'user',
-              content: `Can you translate the following from ${fromLang} text into ${toLang}:"${inputText}"`,
-            },
-            { role: 'assistant', content: 'translate' },
+            { role: 'system', content: 'You are a translator.' },
+            { role: 'user', content: `Translate from ${fromLang} to ${toLang}: ${inputText}` },
           ],
           max_tokens: 500,
-          model: 'gpt-3.5-turbo',
         },
         {
           headers: {
@@ -39,12 +36,12 @@ const TranslatorApp  = () => {
       setTranslatedText(response.data.choices[0].message.content);
       Keyboard.dismiss();
     } catch (error) {
-      console.error('Error in translating the text:', error.response.data);
+      console.error('Error in translating the text:', error?.response?.data || error.message);
     }
   };
 
-
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <View style={styles.container}>
   
   
@@ -80,13 +77,13 @@ const TranslatorApp  = () => {
       }
       textStyle={{
         fontSize: 16,
-        color: '#FFFA7D', // Change the color here
+        color: '#FFFA7D', 
         textAlign:'left',
         padding:10,
         
 
       }}
-      arrowColor="#FFFA7D" // Change the arrow color here
+      arrowColor="#FFFA7D" 
       dropDownStyle={{ backgroundColor: '#FFFA7D' }}
       dropDownContainerStyle={{ backgroundColor: '#333333' }}
       
@@ -116,38 +113,31 @@ const TranslatorApp  = () => {
       }
       textStyle={{
         fontSize: 16,
-        color: '#FFFA7D', // Change the color here
+        color: '#FFFA7D',
         textAlign:'left',
         padding:10,
       }}
-      arrowColor="#FFFA7D" // Change the arrow color here
+      arrowColor="#FFFA7D" 
       dropDownStyle={{ backgroundColor: '#FFFA7D' }}
       dropDownContainerStyle={{ backgroundColor: '#333333' }}      >
 
        </DropDownPicker>
 
       </View>
-      <TextInput style ={styles.input}
-                 on onChangeText={text => setInputText(text)}
-                 value={inputText}
-                 multiline
-      >
-   
-      </TextInput>
+      <TextInput 
+  style={styles.input}
+  onChangeText={text => setInputText(text)} 
+  value={inputText}
+  multiline
+  onSubmitEditing={translateText}
+/>
 
-      {/* the translated response  */}
-      {/* <Text style={styles.text}>translated </Text> */}
+
       <Text style={styles.transaledRes}>
         {translatedText}
 
       </Text>
-      {/* <View>
-      <Image
-                  source={require("../assets/languageBox.png")}
-                  style={styles.borde1}
-                /> 
-      </View> */}
-      {/* button function */}
+  
       <TouchableOpacity
             style={styles.button}
             onPress={translateText}>
@@ -157,6 +147,8 @@ const TranslatorApp  = () => {
       
 
     </View>
+    </TouchableWithoutFeedback>
+
   )
 }
 
@@ -186,10 +178,9 @@ const styles = StyleSheet.create({
     elevation: 11,
     },
 
-    dropdowncontainer:{ // need change the colour 
+    dropdowncontainer:{ 
       flexDirection:'row',
       justifyContent:'space-around',
-      // color:'#FFFA7D',
       
 
     }, 
@@ -198,8 +189,7 @@ const styles = StyleSheet.create({
       backgroundColor:'#000000',
       borderRadius:30,
       width:160,
-      // color:'#FFFA7D',
-      // marginTop:50,
+   
       
       
       
@@ -208,9 +198,7 @@ const styles = StyleSheet.create({
       backgroundColor:'#000000',
       borderRadius:30,
       width:160,
-      // color:'#FFFA7D',
-      // marginTop:50,
-      
+    
       
     },
 
